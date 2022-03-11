@@ -25,10 +25,10 @@ public class GameLogic {
         currentPlayer = Player.X;
     }
 
-    public GameLogic(Player currentPlayer, CellStatus[][] gameTable) {
+    public GameLogic(TicTacToeMove move) {
         this();
-        this.gameTable = gameTable;
-        this.currentPlayer = currentPlayer;
+        this.gameTable = serializedToArray(move.gameTableSerialized);
+        this.currentPlayer = move.currentPlayer;
     }
 
     static private boolean isWinning(CellStatus c0, CellStatus c1, CellStatus c2) {
@@ -39,9 +39,9 @@ public class GameLogic {
         return Optional.of(c == CellStatus.X ? Player.X : Player.O);
     }
 
-    static public GameLogic fromEntity(TicTacToeMove move) {
-        return new GameLogic(move.currentPlayer, serializedToArray(move.gameTableSerialized));
-    }
+//    static public GameLogic fromEntity(TicTacToeMove move) {
+//        return new GameLogic(move);
+//    }
 
     public static CellStatus[][] serializedToArray(String str) {
         return Arrays.stream(str.split("; "))

@@ -18,22 +18,25 @@ public class TicTacToeController {
         return ticTacToeRepository.findAll();
     }
 
-    @PostMapping("/game/newMove")
+    @PostMapping("/game/makeMove")
     public GameLogic makeMove(@RequestParam int i, @RequestParam int j) {
         var gameTable = ticTacToeRepository.findTopByOrderByIdDesc();
-        
-        if (gameTable.isPresent()) {
-            GameLogic game = GameLogic.fromEntity(gameTable.get());
+
+        GameLogic game = new GameLogic(gameTable.get());
+        if (!(game.getTheWinner().isPresent() || game.isDraw())) {
             game.makeMove(i, j);
             ticTacToeRepository.save(game.toEntity());
-            return game;
-        } else {
-            var firstMove = new TicTacToeMove();
-            GameLogic game = GameLogic.fromEntity(firstMove);
-            game.makeMove(i, j);
-            ticTacToeRepository.save(game.toEntity());
-            return game;
         }
+
+        return game;
+    }
+
+    @PostMapping("/game/newGame")
+    public GameLogic newGame() {
+        var newGame = new TicTacToeMove();
+        GameLogic game = new GameLogic(newGame);
+        ticTacToeRepository.save(game.toEntity());
+        return game;
     }
 
 }
