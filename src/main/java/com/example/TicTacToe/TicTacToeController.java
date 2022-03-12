@@ -21,13 +21,19 @@ public class TicTacToeController {
     @PostMapping("/game/makeMove")
     public GameLogic makeMove(@RequestParam int i, @RequestParam int j) {
         var gameTable = ticTacToeRepository.findTopByOrderByIdDesc();
+        GameLogic game;
+        if (gameTable.isEmpty()) {
+            game = newGame();
+        } else {
+            game = new GameLogic(gameTable.get());
+            
+            if (!game.isMoveValid(i, j)) throw new IllegalArgumentException("Move not valid");
+            if (game.isGameOver()) throw new IllegalArgumentException("Game is over");
 
-        GameLogic game = new GameLogic(gameTable.get());
-        if (!(game.getTheWinner().isPresent() || game.isDraw())) {
             game.makeMove(i, j);
             ticTacToeRepository.save(game.toEntity());
-        }
 
+        }
         return game;
     }
 

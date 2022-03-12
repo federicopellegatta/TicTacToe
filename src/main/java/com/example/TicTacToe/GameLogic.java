@@ -96,6 +96,14 @@ public class GameLogic {
                 .allMatch(r -> Arrays.stream(r).noneMatch(c -> c == CellStatus.__));
     }
 
+    public boolean isMoveValid(int i, int j) {
+        return gameTable[i][j] == CellStatus.__;
+    }
+
+    public boolean isGameOver() {
+        return getTheWinner().isPresent() || isDraw();
+    }
+
     public TicTacToeMove toEntity() {
         return new TicTacToeMove(currentPlayer, deserializedArray(gameTable));
     }
