@@ -38,5 +38,4 @@ public class TicTacToeController {
         ticTacToeRepository.save(game.toEntity());
         return game;
     }
-
 }
