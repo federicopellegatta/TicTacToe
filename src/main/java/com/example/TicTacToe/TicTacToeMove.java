@@ -11,14 +11,14 @@ public class TicTacToeMove {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    public TicTacToeMove(Player currentPlayer, String gameTable) {
+    public TicTacToeMove(String gameTableSerialized, Player currentPlayer) {
+        this.gameTableSerialized = gameTableSerialized;
         this.currentPlayer = currentPlayer;
-        this.gameTableSerialized = gameTable;
     }
 
     public TicTacToeMove() {
         this.currentPlayer = Player.X;
-        this.gameTableSerialized = "__, __, __; __, __, __; __, __, __";
+        this.gameTableSerialized = "E,E,E;E,E,E;E,E,E";
     }
 
     public Long getId() {

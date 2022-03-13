@@ -2,8 +2,9 @@ package com.example.TicTacToe;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-enum CellStatus {__, X, O}
+enum CellStatus {E, X, O}
 
 enum Player {X, O}
 
@@ -20,7 +21,7 @@ public class GameLogic {
     GameLogic() {
         for (int i = 0; i < 3; i++)
             for (int j = 0; j < 3; j++)
-                gameTable[i][j] = CellStatus.__;
+                gameTable[i][j] = CellStatus.E;
 
         currentPlayer = Player.X;
     }
@@ -32,29 +33,21 @@ public class GameLogic {
     }
 
     static private boolean isWinning(CellStatus c0, CellStatus c1, CellStatus c2) {
-        return c0 != CellStatus.__ && c0 == c1 && c1 == c2;
+        return c0 != CellStatus.E && c0 == c1 && c1 == c2;
     }
 
     static private Optional<Player> getWinner(CellStatus c) {
         return Optional.of(c == CellStatus.X ? Player.X : Player.O);
     }
 
-//    static public GameLogic fromEntity(TicTacToeMove move) {
-//        return new GameLogic(move);
-//    }
 
     public static CellStatus[][] serializedToArray(String str) {
-        return Arrays.stream(str.split("; "))
-                .map(s -> Arrays.stream(s.split(", "))
+        return Arrays.stream(str.split(";"))
+                .map(s -> Arrays.stream(s.split(","))
                         .map(CellStatus::valueOf).toArray(CellStatus[]::new))
                 .toArray(CellStatus[][]::new);
     }
 
-    public static String deserializedArray(CellStatus[][] arr) {
-        return Arrays.deepToString(arr)
-                .replaceAll("\\[\\[|\\]\\]", "")
-                .replaceAll("\\], \\[", "; ");
-    }
 
     public void makeMove(int i, int j) throws InvalidTicTacToeInput {
 
@@ -62,13 +55,12 @@ public class GameLogic {
             throw new InvalidTicTacToeInput("Out of Bounds");
         }
 
-        if (gameTable[i][j] != CellStatus.__) {
+        if (gameTable[i][j] != CellStatus.E) {
             throw new InvalidTicTacToeInput("Position already used");
         }
 
         gameTable[i][j] = currentPlayer == Player.X ? CellStatus.X : CellStatus.O;
-        currentPlayer = currentPlayer == Player.X
-                ? Player.O : Player.X;
+        currentPlayer = currentPlayer == Player.X ? Player.O : Player.X;
     }
 
     public Optional<Player> getTheWinner() {
@@ -92,12 +84,17 @@ public class GameLogic {
     }
 
     public boolean isDraw() {
-        return Arrays.stream(gameTable)
-                .allMatch(r -> Arrays.stream(r).noneMatch(c -> c == CellStatus.__));
+        for (var row : gameTable)
+            for (var l : row)
+                if (l == CellStatus.E)
+                    return false;
+        return true;
+//        return Arrays.stream(gameTable)
+//                .allMatch(r -> Arrays.stream(r).noneMatch(c -> c == CellStatus.E));
     }
 
     public boolean isMoveValid(int i, int j) {
-        return gameTable[i][j] == CellStatus.__;
+        return gameTable[i][j] == CellStatus.E;
     }
 
     public boolean isGameOver() {
@@ -105,7 +102,10 @@ public class GameLogic {
     }
 
     public TicTacToeMove toEntity() {
-        return new TicTacToeMove(currentPlayer, deserializedArray(gameTable));
+        var gameTableSerialized = Arrays.stream(gameTable)
+                .map(r -> Arrays.stream(r).map(Enum::toString).collect(Collectors.joining(",")))
+                .collect(Collectors.joining(";"));
+        return new TicTacToeMove(gameTableSerialized, currentPlayer);
     }
 
 }

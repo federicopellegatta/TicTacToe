@@ -8,9 +8,9 @@ public class TicTacToeApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(TicTacToeApplication.class, args);
-        CellStatus[][] cells = {{CellStatus.__, CellStatus.X, CellStatus.__},
-                {CellStatus.__, CellStatus.O, CellStatus.__},
-                {CellStatus.__, CellStatus.__, CellStatus.__}
+        CellStatus[][] cells = {{CellStatus.E, CellStatus.X, CellStatus.E},
+                {CellStatus.E, CellStatus.O, CellStatus.E},
+                {CellStatus.E, CellStatus.E, CellStatus.E}
         };
     }
 }
