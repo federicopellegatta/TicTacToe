@@ -84,13 +84,8 @@ public class GameLogic {
     }
 
     public boolean isDraw() {
-        for (var row : gameTable)
-            for (var l : row)
-                if (l == CellStatus.E)
-                    return false;
-        return true;
-//        return Arrays.stream(gameTable)
-//                .allMatch(r -> Arrays.stream(r).noneMatch(c -> c == CellStatus.E));
+        return Arrays.stream(gameTable)
+                .allMatch(r -> Arrays.stream(r).noneMatch(c -> c == CellStatus.E));
     }
 
     public boolean isMoveValid(int i, int j) {

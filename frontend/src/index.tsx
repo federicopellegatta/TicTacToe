@@ -1,82 +1,84 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import axios from "axios";
-import {Button, TextField} from "@mui/material";
+import {Button, Chip} from "@mui/material";
 
-const GAME_BASE_URL = 'http://localhost:8080';
+enum Player { X = 'X', O = 'O'}
 
-enum CellStatus {X = 'X', O = 'O', __ = '__'}
+enum CellStatus { X = 'X', O = 'O', E = 'E'}
 
-enum Player {X = 'X', O = 'O'}
+const createNewGame = () => axios.get('http://localhost:8080/newGame').then(r => r.data);
 
-type Game = {
+const makeMove = (i: number, j: number) =>
+    axios.post(`http://localhost:8080/makeMove?i=${i}&j=${j}`).then(r => r.data);
+
+type Move = {
     currentPlayer: Player,
     gameTable: CellStatus[][],
-    winner: Player | null,
-    isValid: boolean,
-    isDraw: boolean,
-    isGameOver: boolean
-}
-
-const getMoves = async () => {
-    const result = await axios.get(GAME_BASE_URL + 'games')
-    return result.data as Game[];
-}
-
-const createNewGame = async () => {
-    const result = await axios.get(GAME_BASE_URL + '/game/newGame');
-    return result.data as Game[];
-}
-
-const makeMove = async (i: number, j: number) => {
-    await axios.post(GAME_BASE_URL + `/game/makeMove?i=${i}&j=${j}`).then(res => res.data);
-}
-
-const Game = (prop: Game) => {
-    return <div>
-        <h3>{prop.currentPlayer} has played and the board is:</h3>
-        <p>{prop.gameTable}</p>
-    </div>
+    winner: Player | null
 };
 
 const TicTacToeApp = () => {
 
-    const [newI, setNewI] = React.useState(0);
-    const [newJ, setNewJ] = React.useState(0);
-    const [moves, setMoves] = React.useState <Game[]>([]);
+    const [move, setMove] = React.useState<Move | null>(null);
 
-    React.useEffect(() => void createNewGame().then(res => setMoves(res)), []);
+    React.useEffect(() => void createNewGame().then(setMove), []);
 
-    const handleInputI = (e: any) => setNewI(parseInt(e.target.value));
-    const handleInputJ = (e: any) => setNewJ(parseInt(e.target.value));
-
-    const handleAddMove = async () => {
-        if (!newI || !newJ)
-            return;
-        await makeMove(newI, newJ);
-        setNewI(0);
-        setNewJ(0);
+    const Square = ({cell, row, col}: { cell: CellStatus, row: number, col: number }) => {
+        return <Button onClick={() => cell === CellStatus.E && makeMove(row, col).then(setMove)}
+                       color={cell === CellStatus.E ? 'primary' : 'success'}
+                       style={{width: '80px', height: '80px', fontSize: "20px"}}
+                       variant="contained">
+            {cell === CellStatus.E ? '-' : cell === CellStatus.X ? 'X' : 'O'}
+        </Button>
     }
 
-    return <div>
+    const CurrentPlayer = ({currentPlayer}: { currentPlayer: Player }) => <>
+        <Chip label={currentPlayer === Player.X ? '   X   ' : '   O   '}
+              color={currentPlayer === Player.X ? 'error' : 'success'}
+              variant="outlined"
+              style={{margin: '20px', fontSize: "30px"}}/>
+    </>
 
-        <TextField label="Row" type="number" InputLabelProps={{shrink: true,}}
-                   value={newI} onInput={handleInputI}/>
-        <TextField label="Column" type="number" InputLabelProps={{shrink: true,}}
-                   value={newJ} onInput={handleInputJ}/>
-        <Button variant="contained" onClick={handleAddMove}>Submit</Button>
+    if (!move) return <div>Loading...</div>;
 
-        {moves.map((m, id) =>
-            <Game key={id} currentPlayer={m.currentPlayer} gameTable={m.gameTable} winner={m.winner}
-                  isValid={m.isValid} isDraw={m.isDraw} isGameOver={m.isGameOver}/>)
-        }
+    return <div style={{textAlign: "center"}}>
+        <h1>Play Tic-Tac-Toe!</h1>
+        <div>
+            <Square cell={move.gameTable[0][0]} row={0} col={0}/>
+            <Square cell={move.gameTable[0][1]} row={0} col={1}/>
+            <Square cell={move.gameTable[0][2]} row={0} col={2}/>
+        </div>
+        <div>
+            <Square cell={move.gameTable[1][0]} row={1} col={0}/>
+            <Square cell={move.gameTable[1][1]} row={1} col={1}/>
+            <Square cell={move.gameTable[1][2]} row={1} col={2}/>
+        </div>
+        <div>
+            <Square cell={move.gameTable[2][0]} row={2} col={0}/>
+            <Square cell={move.gameTable[2][1]} row={2} col={1}/>
+            <Square cell={move.gameTable[2][2]} row={2} col={2}/>
+        </div>
+
+        <div>
+            <Button onClick={() => createNewGame().then(setMove)}
+                    color="primary"
+                    variant="contained"
+                    style={{margin: '20px'}}>
+                Start a new game
+            </Button>
+        </div>
+
+        <div>
+            <CurrentPlayer currentPlayer={move.currentPlayer}/>
+        </div>
 
     </div>
-}
+
+};
 
 ReactDOM.render(
     <React.StrictMode>
-        <h1>Play Tic-Tac-Toe!</h1>
         <TicTacToeApp/>
     </React.StrictMode>,
     document.getElementById('root')
